@@ -1,0 +1,16 @@
+url: ~
+template:
+  bootstrap: 5
+  bootswatch: cyborg
+  theme: arrow-dark
+  bslib:
+    code-bg: "#2b2b2b"
+  navbar:
+    structure:
+      left:  [search]
+      right: [reference, articles]
+  footer:
+    structure: 
+      left: pkgdown
+      right: [authors, legal]
+

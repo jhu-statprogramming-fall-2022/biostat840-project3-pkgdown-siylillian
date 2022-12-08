@@ -1,3 +1,18 @@
+
+Include a URL to the GitHub link to where the original R package came from.
+
+Include a URL to the deployed website that you will do in Part 1E, but it should be something like https://jhu-statprogramming-fall-2022.github.io/biostat840-project3-pkgdown-<your_github_username>.
+
+Include a description of the 5 things you customized in your pkgdown website (excluding adding the example data analysis from Part 1C).
+
+
+
+
+
+
+
+
+
 # plot.matrix
 Visualizes a matrix object plainly as heatmap. It provides a 
 

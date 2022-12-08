@@ -1,0 +1,125 @@
+---
+title: "Example Analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{vignettes}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(plot.matrix)
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+library(purrr)
+library(forcats)
+```
+
+## Background
+```{r}
+## import data
+library(here)
+if(!file.exists(here("inst/extdata","tuition_cost.RDS"))){
+  tuition_cost <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-10/tuition_cost.csv')
+  salary_potential <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-10/salary_potential.csv')
+  # save the files to RDS objects
+  saveRDS(tuition_cost, file = here("inst/extdata","tuition_cost.RDS"))
+  saveRDS(salary_potential, file = here("inst/extdata","salary_potential.RDS"))
+}
+tuition_cost = readRDS(here("inst/extdata","tuition_cost.RDS"))
+salary_potential = readRDS(here("inst/extdata","salary_potential.RDS"))
+```
+
+You must describe what is the question you aim to answer with the data and data analysis.
+You must describe and link to where the original data come from that you chose.
+You must include a link to a data dictionary for the data or create one inside the webpage.
+
+
+## Data Wrangling
+```{r}
+tuition = tuition_cost %>%
+  filter(degree_length == "4 Year") %>%
+  drop_na() %>%
+  left_join(salary_potential, by = "name")
+
+tuition_in_out = pmap_dbl(tuition,
+                          .f = function(in_state_tuition, out_of_state_tuition, ...){
+                            (in_state_tuition + out_of_state_tuition)/2
+                          }) 
+tuition = cbind(tuition,tuition_in_out)
+```
+
+## Data Visulazation
+
+### 1
+```{r}
+tuition %>% 
+  arrange(desc(tuition_in_out)) %>%
+  head(30) %>%
+  mutate(name = fct_reorder(name, tuition_in_out)) %>%
+  ggplot(aes(x = name, y = tuition_in_out, fill = type)) +
+  geom_col() +
+  coord_flip() +
+  labs(title = "Top 30 most expensive colleges")
+```
+
+### 2
+```{r}
+tuition %>%
+  drop_na() %>%
+  ggplot(aes(x = stem_percent, y = tuition_in_out/10000)) +
+      geom_point(alpha = 0.5) +
+      geom_smooth(method = "lm") +
+      facet_wrap(~state_code, nrow = 10) +
+      labs(x = "% stem",
+           y = "tuition",
+           title = "",
+           subtitle = "",
+           caption = "Siyao Li") +
+  ylim(c(0, max(tuition_in_out/10000)))
+```
+
+
+### 3
+```{r}
+tuition_dat = tuition |> split(tuition$state)
+
+tuition_in_state = tuition_dat |> map_df(.f = ~mean(.x$in_state_tuition)) %>% t()
+tuition_in_state = cbind(state = rownames(tuition_in_state), tuition_in_state)
+tuition_in_state = as.tibble(tuition_in_state)
+tuition_in_state$V2 = as.double(tuition_in_state$V2)
+
+tuition_out_state = tuition_dat |> map_df(.f = ~mean(.x$out_of_state_tuition)) %>% t()
+tuition_out_state = cbind(state = rownames(tuition_out_state), tuition_out_state)
+tuition_out_state = as.tibble(tuition_out_state)
+tuition_out_state$V2 = as.double(tuition_out_state$V2)
+
+tuition_in_out_state = tuition_dat |> map_df(.f = ~mean(.x$tuition_in_out)) %>% t()
+tuition_in_out_state = cbind(state = rownames(tuition_in_out_state), tuition_in_out_state)
+tuition_in_out_state = as.tibble(tuition_in_out_state)
+tuition_in_out_state$V2 = as.double(tuition_in_out_state$V2)
+
+summary = full_join(tuition_in_state, tuition_out_state, by = "state") %>%
+  full_join(tuition_in_out_state, by = "state")
+colnames(summary) = c("state","in_state","out_state","average")
+summary$in_state = summary$in_state/10000
+summary$out_state = summary$out_state/10000
+summary$average = summary$average/10000
+```
+
+```{r}
+m = as.matrix(summary[,2:4])
+plot(m,breaks=4,digits = 3,col=topo.colors, xlab="my x label", ylab="my y label")
+```
+
+## Summary
+
+## Appendix
