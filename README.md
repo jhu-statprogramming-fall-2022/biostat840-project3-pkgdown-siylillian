@@ -1,14 +1,18 @@
 
-Include a URL to the GitHub link to where the original R package came from.
+URL to the GitHub link to where the original R package came from: <https://github.com/sigbertklinke/plot.matrix>
 
-Include a URL to the deployed website that you will do in Part 1E, but it should be something like https://jhu-statprogramming-fall-2022.github.io/biostat840-project3-pkgdown-<your_github_username>.
+URL to the deployed website: <https://jhu-statprogramming-fall-2022.github.io/biostat840-project3-pkgdown-<your_github_username>>
 
-Include a description of the 5 things you customized in your pkgdown website (excluding adding the example data analysis from Part 1C).
+5 things you customized in your pkgdown website:
+- change the bootswatch theme.
 
+- change the syntax highlighting in code blocks.
 
+- change the code color for the inline color.
 
+- change the structure of the navbar.
 
-
+- change the component of the articles.
 
 
 

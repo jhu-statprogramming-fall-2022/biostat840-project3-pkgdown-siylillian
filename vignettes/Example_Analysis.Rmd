@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r setup, warning=F, message=F}
 library(plot.matrix)
 library(dplyr)
 library(tidyr)
@@ -24,7 +24,8 @@ library(forcats)
 ```
 
 ## Background
-```{r}
+
+```{r, warning=F, message=F}
 ## import data
 library(here)
 if(!file.exists(here("inst/extdata","tuition_cost.RDS"))){
@@ -38,12 +39,16 @@ tuition_cost = readRDS(here("inst/extdata","tuition_cost.RDS"))
 salary_potential = readRDS(here("inst/extdata","salary_potential.RDS"))
 ```
 
-You must describe what is the question you aim to answer with the data and data analysis.
-You must describe and link to where the original data come from that you chose.
-You must include a link to a data dictionary for the data or create one inside the webpage.
+**Question:** We want to analysis the in state tuition and out of state tuition from the United States.
 
+**Data:** The [data](https://github.com/rfordatascience/tidytuesday/tree/master/data/2020/2020-03-10) shows the tuition cost from different universities with different year length and type, which most data are originally came from the US Department of Education.
+
+**Data Dictionary:** The data dictionary is below: <https://github.com/rfordatascience/tidytuesday/tree/master/data/2020/2020-03-10#data-dictionary>
 
 ## Data Wrangling
+
+We want to specifically analysis the tuition from the colleges which has a degree length of 4 years, and combine the data of STEM percentage. Also, we want to know the average tuition which are from out of state and from in state, so we average two different types of tuition.
+
 ```{r}
 tuition = tuition_cost %>%
   filter(degree_length == "4 Year") %>%
@@ -59,8 +64,9 @@ tuition = cbind(tuition,tuition_in_out)
 
 ## Data Visulazation
 
-### 1
-```{r}
+### Colleges Tuition Ranking
+
+```{r, fig.width = 8, fig.height = 8}
 tuition %>% 
   arrange(desc(tuition_in_out)) %>%
   head(30) %>%
@@ -68,28 +74,33 @@ tuition %>%
   ggplot(aes(x = name, y = tuition_in_out, fill = type)) +
   geom_col() +
   coord_flip() +
-  labs(title = "Top 30 most expensive colleges")
+  labs(title = "Top 30 most expensive colleges",
+       subtitle = "The top 30 most expensive colleges are come from private college",
+       xlab = "Tuition in dollar",
+       ylab = "College Name",
+       caption = "Siyao Li")
 ```
 
-### 2
-```{r}
+### Relationship between the STEM Percentage and the Tuition
+
+```{r, warning=F, message=F, fig.width = 8, fig.height = 8}
 tuition %>%
   drop_na() %>%
   ggplot(aes(x = stem_percent, y = tuition_in_out/10000)) +
       geom_point(alpha = 0.5) +
       geom_smooth(method = "lm") +
       facet_wrap(~state_code, nrow = 10) +
-      labs(x = "% stem",
-           y = "tuition",
-           title = "",
-           subtitle = "",
+      labs(x = "STEM percentage",
+           y = "tuition in dollar (10 thousands)",
+           title = "Stem Percentage v.s. Tuition",
+           subtitle = "Higher the stem percentage, higher the tuition.",
            caption = "Siyao Li") +
   ylim(c(0, max(tuition_in_out/10000)))
 ```
 
+### Heat Map between States and Different Type of Tuition
 
-### 3
-```{r}
+```{r, warning=F, message=F, fig.width = 8, fig.height = 8}
 tuition_dat = tuition |> split(tuition$state)
 
 tuition_in_state = tuition_dat |> map_df(.f = ~mean(.x$in_state_tuition)) %>% t()
@@ -117,9 +128,25 @@ summary$average = summary$average/10000
 
 ```{r}
 m = as.matrix(summary[,2:4])
-plot(m,breaks=4,digits = 3,col=topo.colors, xlab="my x label", ylab="my y label")
+plot(m,breaks=4,digits = 3,col=topo.colors, xlab="Type of Tuition", ylab="States")
+title(main = "Different tyle of Tuition",
+      sub = "in state tuition is much lower than the out of state tuition")
 ```
 
 ## Summary
 
+In conclusion, we can notice that the most expensive colleges are private colleges, and the percentage of stem is higher means that the higher the tuition cost. Also, the out of state tuition cost is higher than the in state tuition cost.
+
 ## Appendix
+
+-   purrr: `map_df()`, `pmap_dbl()`
+
+-   dplyr: `arrange()`,`desc()`, `mutate()`, `full_join()`
+
+-   tidyr: `drop_na()`
+
+-   forcats: `fct_reorder()`,
+
+-   ggplot: `geom_point()`, `geom_smooth()`, `geom_col()`, `facet_wrap()`
+
+-   plot.matrix: `plot()` (the most functions in this package is the arguments in the plot function, like change the breaks, and digits.)
