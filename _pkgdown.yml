@@ -2,7 +2,6 @@ url: ~
 template:
   bootstrap: 5
   bootswatch: lux
-  theme: atom-one-light
   bslib:
     code-color: "#306cc9"
   navbar:
