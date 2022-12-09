@@ -1,7 +1,7 @@
 
 URL to the GitHub link to where the original R package came from: <https://github.com/sigbertklinke/plot.matrix>
 
-URL to the deployed website: <https://jhu-statprogramming-fall-2022.github.io/biostat840-project3-pkgdown-<your_github_username>>
+URL to the deployed website: <https://jhu-statprogramming-fall-2022.github.io/biostat840-project3-pkgdown-siylillian>
 
 5 things you customized in your pkgdown website:
 - change the bootswatch theme.
